@@ -14,7 +14,7 @@
 {-# LANGUAGE DataKinds #-}
 module Data.MonoidMap where
 
-import Data.Witherable
+import Witherable
 import Data.Semigroup.Commutative
 import Data.Map.Monoidal (MonoidalMap)
 import qualified Data.Map.Monoidal as Map
