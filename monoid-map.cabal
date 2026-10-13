@@ -32,9 +32,14 @@ library
     , base                 >=4   && <5
     , commutative-semigroups >= 0.1 && < 0.2
     , monoidal-containers  ^>=0.6
-    , reflex               >=0.8 && < 1
     , witherable           >=0.3 && <0.5
     , patch                >=0.0.8.0 && < 0.1
+    -- 'reflex' dependency removed as part of the reflex -> reflex
+    -- port. The 'Query' instance for 'MonoidMap' moved to
+    -- 'Reflex.Effectful.Class.Query.Class' (in reflex) so this
+    -- package can stay a leaf and avoid a monoid-map <-> reflex
+    -- dependency cycle. 'Group' now comes from 'patch' (Data.Patch), which
+    -- is already a dep.
 
   hs-source-dirs:   src
   default-language: Haskell2010

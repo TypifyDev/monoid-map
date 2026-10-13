@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE UndecidableInstances #-} -- For (DecidablyEmpty (QueryResult q), Ord k, Query q) => Query (MonoidMap k q)
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE DataKinds #-}
 module Data.MonoidMap where
@@ -19,7 +19,13 @@ import Data.Semigroup.Commutative
 import Data.Map.Monoidal (MonoidalMap)
 import qualified Data.Map.Monoidal as Map
 import Data.Semigroup (Semigroup, (<>))
-import Reflex (Query, QueryResult, crop, Group(..))
+-- Note: the 'Query' / 'QueryResult' / 'crop' instance for 'MonoidMap' has
+-- been moved to 'Reflex.Query.Class' in the reflex-effectful
+-- package. It cannot live in this module because that would create a
+-- monoid-map -> reflex-effectful -> monoid-map dependency cycle
+-- (reflex-effectful already depends on monoid-map for the newtype itself).
+-- Only the pure 'Group' instance remains here; 'Group' comes from 'Data.Patch'.
+import Data.Patch (Group(..))
 import Data.Monoid.DecidablyEmpty
 import GHC.TypeLits
 
@@ -46,11 +52,8 @@ instance (Ord k, DecidablyEmpty v) => DecidablyEmpty (MonoidMap k v) where
 monoidMap :: (Ord k, DecidablyEmpty v) => MonoidalMap k v -> MonoidMap k v
 monoidMap = MonoidMap . Map.filter (not . isEmpty)
 
-instance (DecidablyEmpty (QueryResult q), Ord k, Query q) => Query (MonoidMap k q) where
-  type QueryResult (MonoidMap k q) = MonoidMap k (QueryResult q)
-  crop (MonoidMap q) (MonoidMap qr) =
-    -- This assumes that the query result of a null query should be null
-    monoidMap $ Map.intersectionWith crop q qr
+-- The 'Query (MonoidMap k q)' instance lives in
+-- 'Reflex.Query.Class' (see note above the imports).
 
 instance (Monoid a, DecidablyEmpty a, Ord k) => Semigroup (MonoidMap k a) where
   MonoidMap a <> MonoidMap b =
